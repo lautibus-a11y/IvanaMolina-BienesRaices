@@ -124,6 +124,17 @@
             -webkit-backdrop-filter: blur(12px);
             border-top: 1px solid rgba(0,0,0,0.05);
         }
+
+        /* Mercado Libre Gallery Thumbnails */
+        .gallery-thumb {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .gallery-thumb.active {
+            border-color: #000000 !important;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+            opacity: 1 !important;
+            transform: scale(1.04);
+        }
     </style>
 </head>
 <body class="text-black">
@@ -201,95 +212,209 @@
             </div>
         </section>
 
-        <!-- VIEW: PROPERTY DETAILS -->
-        <section id="view-property" class="view-section relative bg-white md:bg-gray-50 md:py-10">
-             <!-- Desktop Split Layout Wrapper -->
-             <div class="md:max-w-6xl md:mx-auto md:bg-white md:rounded-[40px] md:shadow-2xl md:overflow-hidden md:flex md:flex-row md:min-h-[80vh]">
-                 
-                 <!-- Gallery Slider (Simplified to main image for mobile elegance) -->
-                 <div class="relative w-full h-[50vh] md:h-auto md:w-1/2">
-                    <img id="prop-img" src="" class="absolute inset-0 w-full h-full object-cover" alt="Property">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent md:bg-none md:bg-gradient-to-t md:from-black/60 md:to-transparent"></div>
-                    
-                    <!-- Back Button -->
-                    <button onclick="goBackToCategory()" class="absolute top-12 left-5 md:top-8 md:left-8 w-10 h-10 md:w-12 md:h-12 bg-black/30 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 transition hover:bg-black/50">
-                        <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        <!-- VIEW: PROPERTY DETAILS (Mercado Libre Style Gallery & Showcase) -->
+        <section id="view-property" class="view-section relative bg-gray-50/70 py-4 sm:py-8 lg:py-10">
+            <!-- Container -->
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                
+                <!-- Top Navigation Bar -->
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <button onclick="goBackToCategory()" class="inline-flex items-center space-x-2 text-sm font-semibold text-gray-700 hover:text-black transition bg-white px-3.5 py-2 rounded-full shadow-sm border border-gray-100 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <span>Volver al listado</span>
                     </button>
 
-                    <!-- Status Badge -->
-                    <div class="absolute top-12 right-5 md:top-8 md:right-8 px-4 md:px-5 py-1.5 md:py-2 bg-black/40 backdrop-blur-md text-white text-xs md:text-sm font-bold uppercase tracking-wider rounded-full z-20">
-                        <span id="prop-op-badge">Venta</span>
+                    <!-- Breadcrumbs (Desktop) -->
+                    <div class="hidden sm:flex items-center space-x-2 text-xs font-medium text-gray-400">
+                        <span onclick="goBackToHome()" class="hover:text-black cursor-pointer transition">Inicio</span>
+                        <span>/</span>
+                        <span onclick="goBackToCategory()" id="prop-crumb-cat" class="hover:text-black cursor-pointer transition">Categoría</span>
+                        <span>/</span>
+                        <span id="prop-crumb-op" class="text-gray-700 uppercase font-semibold">Venta</span>
+                    </div>
+
+                    <!-- Share Button -->
+                    <button onclick="shareProperty()" class="w-9 h-9 bg-white hover:bg-gray-100 text-gray-700 rounded-full flex items-center justify-center shadow-sm border border-gray-100 transition active:scale-95" title="Compartir propiedad">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Main Card: Mercado Libre Split Layout -->
+                <div class="bg-white rounded-[24px] sm:rounded-[36px] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:divide-x lg:divide-gray-100">
+                        
+                        <!-- LEFT COLUMN: MERCADO LIBRE PRODUCT GALLERY (7 cols on lg) -->
+                        <div class="lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
+                            <!-- Gallery Wrapper (Vertical thumbnails on desktop) -->
+                            <div class="flex flex-col md:flex-row gap-3 sm:gap-4">
+                                <!-- Thumbnails Column (Desktop: Vertical) -->
+                                <div id="gallery-thumbnails-desktop" class="hidden md:flex flex-col space-y-2.5 overflow-y-auto max-h-[500px] w-20 shrink-0 no-scrollbar pr-1">
+                                    <!-- Injected via JS -->
+                                </div>
+
+                                <!-- Main High-Res Showcase Viewer -->
+                                <div class="relative flex-1 h-[340px] sm:h-[440px] md:h-[500px] rounded-2xl sm:rounded-3xl overflow-hidden bg-gray-100 border border-gray-100 group select-none">
+                                    <img id="prop-main-img" src="" class="w-full h-full object-cover cursor-zoom-in transition-transform duration-500 group-hover:scale-105" alt="Propiedad" onclick="openLightbox()">
+                                    
+                                    <!-- Badges -->
+                                    <div class="absolute top-3.5 left-3.5 flex items-center space-x-2 z-10">
+                                        <span id="prop-op-badge" class="bg-black/75 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">Venta</span>
+                                        <span class="bg-white/90 backdrop-blur-md text-black text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">Exclusivo</span>
+                                    </div>
+
+                                    <!-- Fullscreen Zoom Button -->
+                                    <button onclick="openLightbox()" class="absolute top-3.5 right-3.5 w-9 h-9 sm:w-10 sm:h-10 bg-black/50 hover:bg-black/80 backdrop-blur-md text-white rounded-full flex items-center justify-center transition shadow-md z-10" title="Ver en pantalla completa">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l-5 5M11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                    </button>
+
+                                    <!-- Navigation Arrows -->
+                                    <button onclick="prevGalleryImage()" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 z-10">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                                    </button>
+                                    <button onclick="nextGalleryImage()" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg transition-all opacity-80 group-hover:opacity-100 hover:scale-110 active:scale-95 z-10">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                                    </button>
+
+                                    <!-- Counter Pill (Mercado Libre Style) -->
+                                    <div class="absolute bottom-3.5 right-3.5 bg-black/70 backdrop-blur-md text-white text-[11px] sm:text-xs font-semibold px-3 py-1 rounded-full flex items-center space-x-1 shadow-md z-10 pointer-events-none">
+                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span id="gallery-counter-current">1</span>
+                                        <span>/</span>
+                                        <span id="gallery-counter-total">5</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Horizontal Thumbnails Strip -->
+                            <div id="gallery-thumbnails-mobile" class="flex md:hidden space-x-2.5 overflow-x-auto pt-3 pb-1 no-scrollbar">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: MERCADO LIBRE COMMERCIAL PANEL (5 cols on lg) -->
+                        <div class="lg:col-span-5 p-5 sm:p-7 lg:p-8 flex flex-col justify-between bg-white">
+                            <div>
+                                <!-- Publication Header -->
+                                <div class="flex items-center space-x-2 mb-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                    <span id="prop-condition">Disponible · Inmobiliaria Ivana Molina</span>
+                                </div>
+
+                                <!-- Property Title -->
+                                <h1 id="prop-title" class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight mb-2"></h1>
+
+                                <!-- Location with Pin -->
+                                <p id="prop-location" class="text-gray-500 text-xs sm:text-sm flex items-center mb-5 font-medium"></p>
+
+                                <!-- Price Box (Mercado Libre Style) -->
+                                <div class="bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-100 mb-6">
+                                    <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Precio de publicación</span>
+                                    <div id="prop-price" class="text-3xl sm:text-4xl font-extrabold text-black tracking-tight mb-1.5"></div>
+                                    <div class="flex items-center text-xs text-gray-500 space-x-2">
+                                        <span id="prop-expenses" class="font-medium">Sin expensas</span>
+                                        <span>·</span>
+                                        <span class="text-emerald-700 font-semibold flex items-center">
+                                            <svg class="w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Apto Crédito
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Key Specs Pills (Ficha técnica Mercado Libre) -->
+                                <div class="grid grid-cols-4 gap-2 mb-6">
+                                    <div class="bg-gray-50/80 rounded-xl p-2.5 text-center border border-gray-100">
+                                        <svg class="w-4 h-4 mx-auto text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l-5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                        <span id="prop-area" class="block text-xs font-bold text-gray-900 truncate"></span>
+                                        <span class="text-[10px] text-gray-400 font-medium">Sup.</span>
+                                    </div>
+                                    <div class="bg-gray-50/80 rounded-xl p-2.5 text-center border border-gray-100">
+                                        <svg class="w-4 h-4 mx-auto text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                        <span id="prop-beds" class="block text-xs font-bold text-gray-900 truncate"></span>
+                                        <span class="text-[10px] text-gray-400 font-medium">Dorms</span>
+                                    </div>
+                                    <div class="bg-gray-50/80 rounded-xl p-2.5 text-center border border-gray-100">
+                                        <svg class="w-4 h-4 mx-auto text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span id="prop-baths" class="block text-xs font-bold text-gray-900 truncate"></span>
+                                        <span class="text-[10px] text-gray-400 font-medium">Baños</span>
+                                    </div>
+                                    <div class="bg-gray-50/80 rounded-xl p-2.5 text-center border border-gray-100">
+                                        <svg class="w-4 h-4 mx-auto text-gray-700 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h8m-8 4h8m-8 4h4m6 4H6a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2z"></path></svg>
+                                        <span id="prop-garage" class="block text-xs font-bold text-gray-900 truncate"></span>
+                                        <span class="text-[10px] text-gray-400 font-medium">Cocheras</span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons (Desktop & Tablet) -->
+                                <div class="space-y-2.5 mb-8">
+                                    <button onclick="contactViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/20 active:scale-[0.98]">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                        <span>Consultar por WhatsApp</span>
+                                    </button>
+                                    <button onclick="scheduleVisit()" class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3.5 px-6 rounded-2xl flex items-center justify-center space-x-2 transition active:scale-[0.98]">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <span>Solicitar Visita Presencial</span>
+                                    </button>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="mb-6">
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Descripción de la propiedad</h3>
+                                    <p id="prop-desc" class="text-gray-600 text-sm leading-relaxed"></p>
+                                </div>
+
+                                <!-- Characteristics & Amenities -->
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Características y Comodidades</h3>
+                                    <div id="prop-features" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-gray-700">
+                                        <!-- Injected via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Content Panel -->
-                <div class="relative -mt-10 md:mt-0 bg-white rounded-t-[40px] md:rounded-none px-6 pt-10 pb-32 md:pb-10 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-none min-h-[60vh] md:min-h-0 md:w-1/2 md:flex md:flex-col md:justify-center md:px-12">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 id="prop-title" class="text-2xl md:text-4xl font-bold leading-tight mb-2 text-black">Título de propiedad</h2>
-                            <p id="prop-location" class="text-gray-500 text-sm md:text-base flex items-center">
-                                <svg class="w-4 h-4 md:w-5 md:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                Ubicación
-                            </p>
-                        </div>
-                    </div>
+            </div>
 
-                    <div class="mb-8">
-                        <h3 id="prop-price" class="text-3xl md:text-4xl font-bold text-black tracking-tight">USD 0</h3>
+            <!-- Fullscreen Lightbox Modal (Mercado Libre Zoom) -->
+            <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-8 hidden select-none" onclick="if(event.target === this) closeLightbox()">
+                <!-- Header with Counter and Close Button -->
+                <div class="flex items-center justify-between text-white z-20">
+                    <div class="text-sm font-semibold tracking-wide bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
+                        <span id="lightbox-counter-current">1</span> / <span id="lightbox-counter-total">5</span>
                     </div>
+                    <button onclick="closeLightbox()" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
 
-                    <!-- Features Grid -->
-                    <div class="grid grid-cols-3 gap-4 md:gap-6 mb-8">
-                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
-                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                            <span id="prop-beds" class="text-sm md:text-base font-semibold">0</span>
-                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Dorms</span>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
-                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span id="prop-baths" class="text-sm md:text-base font-semibold">0</span>
-                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Baños</span>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
-                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                            <span id="prop-area" class="text-sm md:text-base font-semibold">0m2</span>
-                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Superficie</span>
-                        </div>
-                    </div>
+                <!-- Center Image with Prev / Next Navigation -->
+                <div class="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
+                    <button onclick="prevGalleryImage()" class="absolute left-2 sm:left-6 w-12 h-12 bg-white/10 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition active:scale-95 z-20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <img id="lightbox-img" src="" class="max-h-[82vh] max-w-[92vw] object-contain rounded-xl shadow-2xl transition-transform duration-300" alt="Vista ampliada">
+                    <button onclick="nextGalleryImage()" class="absolute right-2 sm:right-6 w-12 h-12 bg-white/10 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition active:scale-95 z-20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
 
-                    <div class="mb-8">
-                        <h4 class="text-lg md:text-xl font-bold mb-3">Descripción</h4>
-                        <p id="prop-desc" class="text-gray-500 text-sm md:text-base leading-relaxed"></p>
-                    </div>
-
-                    <div class="mb-8">
-                        <h4 class="text-lg md:text-xl font-bold mb-3">Características</h4>
-                        <ul id="prop-features" class="space-y-2 text-sm md:text-base text-gray-600 list-disc pl-4">
-                            <!-- Injected -->
-                        </ul>
-                    </div>
-
-                    <!-- Desktop Action Buttons (Hidden on Mobile) -->
-                    <div class="hidden md:flex space-x-4 mt-auto pt-8 border-t border-gray-100">
-                        <button class="flex-1 bg-black text-white py-4 rounded-full font-semibold text-base flex items-center justify-center space-x-2 transition hover:bg-gray-800 hover:shadow-lg active:scale-95">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                            <span>Consultar WhatsApp</span>
-                        </button>
-                        <button class="w-14 bg-gray-100 text-black py-4 rounded-full flex items-center justify-center transition hover:bg-gray-200 hover:shadow-md active:scale-95">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                        </button>
-                    </div>
+                <!-- Footer Hint -->
+                <div class="text-center text-white/50 text-xs py-1">
+                    Hacé clic en las flechas o presioná las teclas ← / → para navegar
                 </div>
             </div>
 
             <!-- Fixed Bottom Action Bar (Mobile Only) -->
-            <div class="fixed bottom-0 left-0 w-full glass-panel px-5 py-4 z-50 flex space-x-3 transform translate-y-full md:hidden" id="action-bar" style="max-width: 100%; left: 0; transform: translateY(100%);">
-                <button class="flex-1 bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center space-x-2 transition hover:bg-gray-900 active:scale-95">
+            <div class="fixed bottom-0 left-0 w-full glass-panel px-4 py-3 z-40 flex space-x-2.5 md:hidden" id="action-bar">
+                <button onclick="contactViaWhatsApp()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/20 active:scale-95">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                    <span>Consultar WhatsApp</span>
+                    <span>WhatsApp</span>
                 </button>
-                <button class="w-14 bg-gray-100 text-black py-4 rounded-full flex items-center justify-center transition hover:bg-gray-200 active:scale-95">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                <button onclick="scheduleVisit()" class="flex-1 bg-black hover:bg-gray-800 text-white py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2 transition active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>Visita</span>
                 </button>
             </div>
         </section>
@@ -309,13 +434,170 @@
                 { id: "terrenos", name: "Terrenos", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800" }
             ],
             properties: [
-                { id: 1, categoryId: "casas", type: "venta", name: "Casa Minimalista en San Isidro", location: "San Isidro, GBA Norte", price: "USD 350.000", beds: 4, baths: 3, area: "250", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800", description: "Espectacular casa de diseño minimalista con detalles de categoría. Amplio living comedor, cocina integrada con isla, galería con parrilla y piscina. Dormitorio principal en suite con vestidor.", features: ["Piscina climatizada", "Losa radiante", "Seguridad 24hs", "Riego automático"] },
-                { id: 2, categoryId: "casas", type: "alquiler", name: "Chalet Clásico c/ Parque", location: "Martinez, GBA Norte", price: "USD 1.200 / mes", beds: 3, baths: 2, area: "180", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800", description: "Hermoso chalet clásico rodeado de naturaleza. Ideal para familias. Cuenta con hogar a leña, amplio jardín y garage para 2 autos.", features: ["Jardín parquizado", "Hogar a leña", "Garage doble"] },
-                { id: 3, categoryId: "departamentos", type: "venta", name: "Piso Exclusivo Vista Río", location: "Puerto Madero, CABA", price: "USD 580.000", beds: 2, baths: 2, area: "120", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800", description: "Piso alto con vistas panorámicas al río y la ciudad. Amenities premium. Terminaciones de primer nivel.", features: ["Gimnasio", "SUM", "Piscina en terraza", "Cochera cubierta"] },
-                { id: 4, categoryId: "departamentos", type: "alquiler", name: "Depto 2 Ambientes Moderno", location: "Palermo, CABA", price: "ARS 350.000 / mes", beds: 1, baths: 1, area: "45", image: "https://images.unsplash.com/photo-1502672260266-1c1c24240f38?auto=format&fit=crop&q=80&w=800", description: "Ideal para jóvenes profesionales. Cerca de polo gastronómico y transporte público. Balcón al frente.", features: ["Balcón", "Aire Acondicionado", "Cocina equipada"] },
-                { id: 5, categoryId: "quintas", type: "venta", name: "Quinta El Ensueño", location: "Pilar, GBA Norte", price: "USD 220.000", beds: 4, baths: 3, area: "1500", image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800", description: "Increíble lote arbolado con casa principal y casa de huéspedes. Gran piscina y quincho cerrado.", features: ["Quincho cerrado", "Casa de huéspedes", "Gran parque arbolado"] },
-                { id: 6, categoryId: "locales", type: "venta", name: "Local Comercial Esquina", location: "Belgrano, CABA", price: "USD 450.000", beds: 0, baths: 2, area: "100", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800", description: "Excelente local en esquina sobre avenida principal. Vidriera blindex, persiana metálica automática y entrepiso.", features: ["Vidriera doble altura", "Persiana automática", "Alto tránsito peatonal"] },
-                { id: 7, categoryId: "terrenos", type: "venta", name: "Lote al Agua en Barrio Cerrado", location: "Nordelta, Tigre", price: "USD 180.000", beds: 0, baths: 0, area: "800", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800", description: "Último lote disponible al agua en barrio consolidado. Orientación Norte.", features: ["Costa de lago", "Seguridad 24hs", "Club House"] }
+                { 
+                    id: 1, 
+                    categoryId: "casas", 
+                    type: "venta", 
+                    name: "Casa Minimalista en San Isidro", 
+                    location: "San Isidro, GBA Norte", 
+                    price: "USD 350.000", 
+                    beds: 4, 
+                    baths: 3, 
+                    area: "250",
+                    garage: 2,
+                    expenses: "Sin expensas",
+                    condition: "Excelente estado · A estrenar",
+                    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Espectacular casa de diseño minimalista con detalles de categoría. Amplio living comedor con techos de doble altura, cocina integrada con isla de cuarzo y muebles a medida. Galería semicubierta con parrilla de acero inoxidable y piscina iluminada. Dormitorio principal en suite con vestidor y balcón privado al jardín.", 
+                    features: ["Piscina climatizada", "Losa radiante individual", "Seguridad 24hs", "Riego automático", "Aberturas DVH con doble vidrio", "Cochera para 2 camionetas", "Parrilla gourmet", "Lavadero independiente"] 
+                },
+                { 
+                    id: 2, 
+                    categoryId: "casas", 
+                    type: "alquiler", 
+                    name: "Chalet Clásico c/ Parque", 
+                    location: "Martinez, GBA Norte", 
+                    price: "USD 1.200 / mes", 
+                    beds: 3, 
+                    baths: 2, 
+                    area: "180",
+                    garage: 2,
+                    expenses: "Sin expensas",
+                    condition: "Muy buen estado",
+                    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1540518614846-7ede433c4ef2?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Hermoso chalet clásico rodeado de añosa arboleda en inmejorable zona residencial de Martínez. Living con gran hogar a leña tradicional, pisos de madera tarugada, cocina con comedor diario y salida al jardín con quincho cerrado.", 
+                    features: ["Jardín parquizado 400m²", "Hogar a leña", "Garage doble cubierto", "Portón automático", "Quincho cerrado con parrilla", "Aire acondicionado split en todos los ambientes"] 
+                },
+                { 
+                    id: 3, 
+                    categoryId: "departamentos", 
+                    type: "venta", 
+                    name: "Piso Exclusivo Vista Río", 
+                    location: "Puerto Madero, CABA", 
+                    price: "USD 580.000", 
+                    beds: 2, 
+                    baths: 2, 
+                    area: "120",
+                    garage: 1,
+                    expenses: "Expensas: ARS 180.000",
+                    condition: "Categoría Premium · Torre de lujo",
+                    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1502005229762-ae1b460020e2?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1556909212-d5b604d0c902?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Piso alto con vistas panorámicas 180° al río y a la reserva ecológica. Palier privado, master suite con hidromasaje y vestidor, carpinterías alemanas con aislamiento acústico total. Torre con amenities 5 estrellas.", 
+                    features: ["Gimnasio con vista al río", "Piscina climatizada in/out", "Spa & Sauna", "SUM equipado para 50 personas", "Cochera fija cubierta", "Seguridad con control biométrico 24hs", "Valet parking"] 
+                },
+                { 
+                    id: 4, 
+                    categoryId: "departamentos", 
+                    type: "alquiler", 
+                    name: "Depto 2 Ambientes Moderno", 
+                    location: "Palermo, CABA", 
+                    price: "ARS 350.000 / mes", 
+                    beds: 1, 
+                    baths: 1, 
+                    area: "45",
+                    garage: 0,
+                    expenses: "Expensas: ARS 45.000",
+                    condition: "Excelente · Semi amoblado",
+                    image: "https://images.unsplash.com/photo-1502672260266-1c1c24240f38?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1502672260266-1c1c24240f38?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Ideal para jóvenes profesionales o parejas. Ubicación estratégica en el polo gastronómico de Palermo Hollywood. Balcón aterrazado al frente muy luminoso, cocina equipada con anafe vitrocerámico y horno eléctrico.", 
+                    features: ["Balcón aterrazado", "Aire Acondicionado Inverter", "Laundry en edificio", "Parrilla en terraza", "Bicicletero"] 
+                },
+                { 
+                    id: 5, 
+                    categoryId: "quintas", 
+                    type: "venta", 
+                    name: "Quinta El Ensueño", 
+                    location: "Pilar, GBA Norte", 
+                    price: "USD 220.000", 
+                    beds: 4, 
+                    baths: 3, 
+                    area: "1500",
+                    garage: 4,
+                    expenses: "Sin expensas",
+                    condition: "Impecable",
+                    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Increíble propiedad sobre lote de 1.500 m² arbolado. Casa principal con 3 dormitorios, casa de caseros o huéspedes independiente, quincho vidriado con parrilla y horno de barro, y gran piscina de 10x5m con solarium.", 
+                    features: ["Parque de 1.500m²", "Piscina de 10x5m", "Quincho cerrado con horno de barro", "Casa de huéspedes", "Cochera techada para 4 vehículos"] 
+                },
+                { 
+                    id: 6, 
+                    categoryId: "locales", 
+                    type: "venta", 
+                    name: "Local Comercial Esquina", 
+                    location: "Belgrano, CABA", 
+                    price: "USD 450.000", 
+                    beds: 0, 
+                    baths: 2, 
+                    area: "100",
+                    garage: 0,
+                    expenses: "Expensas: ARS 60.000",
+                    condition: "Excelente ubicación comercial",
+                    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Estratégica esquina comercial en el corazón de Belgrano sobre avenida de alto tránsito peatonal y vehicular. Vidriera continua de doble altura de 18 metros lineales, persiana microperforada motorizada y entrepiso de hormigón armado.", 
+                    features: ["Vidriera doble altura 18m", "Persiana metálica automática", "Apto todo destino comercial / gastronómico", "Baño para discapacitados", "Instalación trifásica"] 
+                },
+                { 
+                    id: 7, 
+                    categoryId: "terrenos", 
+                    type: "venta", 
+                    name: "Lote al Agua en Barrio Cerrado", 
+                    location: "Nordelta, Tigre", 
+                    price: "USD 180.000", 
+                    beds: 0, 
+                    baths: 0, 
+                    area: "800",
+                    garage: 0,
+                    expenses: "Expensas: ARS 110.000",
+                    condition: "Listo para escriturar y construir",
+                    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200",
+                    images: [
+                        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&q=80&w=1200",
+                        "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=1200"
+                    ],
+                    description: "Exclusivo lote de 800 m² con 22 metros de costa directa sobre el lago central. Orientación Norte privilegiada, garantizando sol durante todo el día. Barrio consolidado con náutica sin motor, canchas de tenis y fútbol.", 
+                    features: ["Costa directa al lago central", "Orientación Norte", "Seguridad perimetral y cámaras 24hs", "Club House náutico", "Canchas de tenis y paddle"] 
+                }
             ]
         };
 
@@ -691,38 +973,284 @@
             `).join('');
         }
 
+        // --- MERCADO LIBRE GALLERY STATE & CONTROLLERS ---
+        let currentProp = null;
+        let currentGalleryImages = [];
+        let currentGalleryIndex = 0;
+
+        function setupPropertyGallery(prop) {
+            currentGalleryImages = (prop.images && prop.images.length > 0) ? prop.images : [prop.image];
+            currentGalleryIndex = 0;
+
+            const mainImg = document.getElementById('prop-main-img');
+            if (mainImg) {
+                mainImg.src = currentGalleryImages[0];
+            }
+
+            // Update Counter
+            const counterCurrent = document.getElementById('gallery-counter-current');
+            const counterTotal = document.getElementById('gallery-counter-total');
+            if (counterCurrent) counterCurrent.innerText = '1';
+            if (counterTotal) counterTotal.innerText = currentGalleryImages.length;
+
+            // Render Desktop Vertical Thumbnails
+            const desktopContainer = document.getElementById('gallery-thumbnails-desktop');
+            if (desktopContainer) {
+                desktopContainer.innerHTML = currentGalleryImages.map((imgUrl, idx) => `
+                    <button onclick="updateGalleryMainImage(${idx})" onmouseenter="updateGalleryMainImage(${idx})" class="gallery-thumb w-20 h-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${idx === 0 ? 'active ring-2 ring-black border-black opacity-100 shadow-sm' : 'border-gray-200 opacity-60 hover:opacity-100'}" title="Foto ${idx + 1}">
+                        <img src="${imgUrl}" class="w-full h-full object-cover" alt="Foto miniatura ${idx + 1}">
+                    </button>
+                `).join('');
+            }
+
+            // Render Mobile Horizontal Thumbnails
+            const mobileContainer = document.getElementById('gallery-thumbnails-mobile');
+            if (mobileContainer) {
+                mobileContainer.innerHTML = currentGalleryImages.map((imgUrl, idx) => `
+                    <button onclick="updateGalleryMainImage(${idx})" class="gallery-thumb-mobile w-16 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${idx === 0 ? 'ring-2 ring-black border-black opacity-100 shadow-sm' : 'border-gray-200 opacity-60'}" title="Foto ${idx + 1}">
+                        <img src="${imgUrl}" class="w-full h-full object-cover" alt="Foto miniatura ${idx + 1}">
+                    </button>
+                `).join('');
+            }
+        }
+
+        function updateGalleryMainImage(index) {
+            if (index < 0 || index >= currentGalleryImages.length) return;
+            currentGalleryIndex = index;
+
+            const mainImg = document.getElementById('prop-main-img');
+            if (mainImg) {
+                gsap.to(mainImg, {
+                    opacity: 0.4,
+                    scale: 0.985,
+                    duration: 0.12,
+                    onComplete: () => {
+                        mainImg.src = currentGalleryImages[index];
+                        gsap.to(mainImg, { opacity: 1, scale: 1, duration: 0.22, ease: "power2.out" });
+                    }
+                });
+            }
+
+            // Update Desktop Thumbnails Active State
+            const desktopThumbs = document.querySelectorAll('#gallery-thumbnails-desktop .gallery-thumb');
+            desktopThumbs.forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('active', 'ring-2', 'ring-black', 'border-black', 'opacity-100', 'shadow-sm');
+                    thumb.classList.remove('border-gray-200', 'opacity-60');
+                } else {
+                    thumb.classList.remove('active', 'ring-2', 'ring-black', 'border-black', 'opacity-100', 'shadow-sm');
+                    thumb.classList.add('border-gray-200', 'opacity-60');
+                }
+            });
+
+            // Update Mobile Thumbnails Active State & Scroll Into View
+            const mobileThumbs = document.querySelectorAll('#gallery-thumbnails-mobile .gallery-thumb-mobile');
+            mobileThumbs.forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('ring-2', 'ring-black', 'border-black', 'opacity-100', 'shadow-sm');
+                    thumb.classList.remove('border-gray-200', 'opacity-60');
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    thumb.classList.remove('ring-2', 'ring-black', 'border-black', 'opacity-100', 'shadow-sm');
+                    thumb.classList.add('border-gray-200', 'opacity-60');
+                }
+            });
+
+            // Update Badge Counters
+            const counterCurrent = document.getElementById('gallery-counter-current');
+            if (counterCurrent) counterCurrent.innerText = index + 1;
+
+            // Update Lightbox if Open
+            const lightboxModal = document.getElementById('lightbox-modal');
+            if (lightboxModal && !lightboxModal.classList.contains('hidden')) {
+                const lightboxImg = document.getElementById('lightbox-img');
+                if (lightboxImg) lightboxImg.src = currentGalleryImages[index];
+                const lbCurrent = document.getElementById('lightbox-counter-current');
+                if (lbCurrent) lbCurrent.innerText = index + 1;
+            }
+        }
+
+        function nextGalleryImage() {
+            if (!currentGalleryImages.length) return;
+            const nextIdx = (currentGalleryIndex + 1) % currentGalleryImages.length;
+            updateGalleryMainImage(nextIdx);
+        }
+
+        function prevGalleryImage() {
+            if (!currentGalleryImages.length) return;
+            const prevIdx = (currentGalleryIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+            updateGalleryMainImage(prevIdx);
+        }
+
+        function openLightbox() {
+            if (!currentGalleryImages.length) return;
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            if (!modal || !img) return;
+
+            img.src = currentGalleryImages[currentGalleryIndex];
+            document.getElementById('lightbox-counter-current').innerText = currentGalleryIndex + 1;
+            document.getElementById('lightbox-counter-total').innerText = currentGalleryImages.length;
+
+            modal.classList.remove('hidden');
+            gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.25 });
+            gsap.fromTo(img, { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            if (!modal || modal.classList.contains('hidden')) return;
+
+            gsap.to(modal, {
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Commercial Actions
+        function contactViaWhatsApp() {
+            if (!currentProp) return;
+            const phone = "5491100000000"; // Reemplazable por el número de WhatsApp oficial
+            const message = `Hola Ivana Molina Bienes Raíces! Estoy interesado/a en la propiedad "${currentProp.name}" (${currentProp.price}) ubicada en ${currentProp.location}. ¿Podrían brindarme más información?`;
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        function scheduleVisit() {
+            if (!currentProp) return;
+            const phone = "5491100000000";
+            const message = `Hola! Quisiera coordinar una visita presencial para conocer "${currentProp.name}" (${currentProp.location}). ¿Qué días y horarios tienen disponibles?`;
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareProperty() {
+            if (!currentProp) return;
+            const shareData = {
+                title: `${currentProp.name} | Ivana Molina Bienes Raíces`,
+                text: `Mirá esta propiedad en ${currentProp.location}: ${currentProp.name} por ${currentProp.price}`,
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert("Enlace de la propiedad copiado al portapapeles!");
+                });
+            } else {
+                alert(`Propiedad: ${currentProp.name} - ${currentProp.price}`);
+            }
+        }
+
+        // Keyboard navigation for Lightbox
+        window.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('lightbox-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowRight') nextGalleryImage();
+                if (e.key === 'ArrowLeft') prevGalleryImage();
+            }
+        });
+
         function openProperty(propId, cardElement) {
             const prop = DB.properties.find(p => p.id === propId);
+            if (!prop) return;
+            currentProp = prop;
+
             const catView = document.getElementById('view-category');
             const propView = document.getElementById('view-property');
+            const catData = DB.categories.find(c => c.id === prop.categoryId);
             
-            // Populate Detail View
-            document.getElementById('prop-img').src = prop.image;
-            document.getElementById('prop-op-badge').innerText = prop.type;
-            document.getElementById('prop-title').innerText = prop.name;
-            document.getElementById('prop-location').innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>${prop.location}`;
-            document.getElementById('prop-price').innerText = prop.price;
-            document.getElementById('prop-beds').innerText = prop.beds;
-            document.getElementById('prop-baths').innerText = prop.baths;
-            document.getElementById('prop-area').innerText = prop.area + 'm2';
-            document.getElementById('prop-desc').innerText = prop.description;
-            
-            document.getElementById('prop-features').innerHTML = prop.features.map(f => `<li>${f}</li>`).join('');
+            // Breadcrumbs
+            if (catData) {
+                const crumbCat = document.getElementById('prop-crumb-cat');
+                if (crumbCat) crumbCat.innerText = catData.name;
+            }
+            const crumbOp = document.getElementById('prop-crumb-op');
+            if (crumbOp) crumbOp.innerText = prop.type.toUpperCase();
 
-            // Transition
-            gsap.set(propView, { display: 'block', opacity: 0, x: 100 });
+            // Header & Badges
+            const badgeOp = document.getElementById('prop-op-badge');
+            if (badgeOp) badgeOp.innerText = prop.type.toUpperCase();
             
-            gsap.to(catView, { opacity: 0, x: -50, duration: 0.4, ease: "power2.inOut", onComplete: () => {
+            const condEl = document.getElementById('prop-condition');
+            if (condEl) condEl.innerText = prop.condition || 'Disponible · Inmobiliaria Ivana Molina';
+
+            // Title & Location
+            const titleEl = document.getElementById('prop-title');
+            if (titleEl) titleEl.innerText = prop.name;
+
+            const locEl = document.getElementById('prop-location');
+            if (locEl) {
+                locEl.innerHTML = `
+                    <svg class="w-4 h-4 mr-1.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>${prop.location}</span>
+                `;
+            }
+
+            // Price & Expenses
+            const priceEl = document.getElementById('prop-price');
+            if (priceEl) priceEl.innerText = prop.price;
+
+            const expEl = document.getElementById('prop-expenses');
+            if (expEl) expEl.innerText = prop.expenses || 'Sin expensas';
+
+            // Key Specs
+            const areaEl = document.getElementById('prop-area');
+            if (areaEl) areaEl.innerText = prop.area + ' m²';
+
+            const bedsEl = document.getElementById('prop-beds');
+            if (bedsEl) bedsEl.innerText = prop.beds > 0 ? prop.beds : '-';
+
+            const bathsEl = document.getElementById('prop-baths');
+            if (bathsEl) bathsEl.innerText = prop.baths > 0 ? prop.baths : '-';
+
+            const garageEl = document.getElementById('prop-garage');
+            if (garageEl) garageEl.innerText = (prop.garage !== undefined && prop.garage > 0) ? prop.garage : '-';
+
+            // Description
+            const descEl = document.getElementById('prop-desc');
+            if (descEl) descEl.innerText = prop.description;
+            
+            // Features Grid
+            const featEl = document.getElementById('prop-features');
+            if (featEl) {
+                featEl.innerHTML = prop.features.map(f => `
+                    <div class="flex items-center space-x-2 bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100">
+                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="text-gray-700 font-medium truncate">${f}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Initialize Mercado Libre Gallery
+            setupPropertyGallery(prop);
+
+            // Smooth Transition
+            gsap.set(propView, { display: 'block', opacity: 0, x: 80 });
+            
+            gsap.to(catView, { opacity: 0, x: -40, duration: 0.35, ease: "power2.inOut", onComplete: () => {
                 catView.classList.remove('active');
                 catView.style.display = 'none';
             }});
             
-            gsap.to(propView, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out", onStart: () => {
+            gsap.to(propView, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out", onStart: () => {
                 propView.classList.add('active');
                 window.scrollTo(0, 0);
                 
-                // Animate bottom bar up
-                gsap.to('#action-bar', { y: 0, duration: 0.6, ease: "back.out(1)", delay: 0.3 });
+                // Animate bottom action bar up on mobile
+                gsap.fromTo('#action-bar', { y: '100%' }, { y: '0%', duration: 0.5, ease: "back.out(1)", delay: 0.2 });
             }});
         }
 
@@ -768,6 +1296,7 @@
         }
 
         function goBackToCategory() {
+            closeLightbox();
             const catView = document.getElementById('view-category');
             const propView = document.getElementById('view-property');
             
