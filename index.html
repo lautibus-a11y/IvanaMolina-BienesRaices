@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Encontrá tu próxima propiedad</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        black: '#0a0a0a',
+                        gray: {
+                            100: '#f4f4f5',
+                            500: '#71717a',
+                            900: '#18181b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* Mobile App Feel setup */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            overflow-x: clip;
+            background-color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Subtle Aurora Mesh Gradient */
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background-color: #ffffff;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 0, 0, 0.12), transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(0, 0, 0, 0.1), transparent 45%),
+                radial-gradient(circle at 50% 80%, rgba(100, 100, 100, 0.12), transparent 50%);
+            filter: blur(40px);
+        }
+
+        /* View Management */
+        .view-section {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+        #view-home {
+            padding-bottom: 0 !important;
+            min-height: auto;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        /* Hide scrollbars for horizontal lists */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Constraints for desktop to look like a mobile app */
+        #app-container {
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            background: transparent;
+            min-height: 100vh;
+        }
+
+        /* Card Image setup for GSAP */
+        .category-card {
+            border-top-left-radius: 36px;
+            border-top-right-radius: 36px;
+            background-color: #f3f4f6;
+            opacity: 1;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* Smooth Image Load */
+        img {
+            transition: opacity 0.3s ease;
+        }
+        img[loading] {
+            opacity: 0;
+        }
+        img.loaded {
+            opacity: 1;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="text-black">
+    <div class="aurora-bg"></div>
+
+    <div id="app-container">
+        <!-- VIEW: HOME -->
+        <section id="view-home" class="view-section active px-0 md:px-8 lg:px-12 pt-8 md:pt-12 !pb-0">
+            <div class="w-full mx-auto">
+                <!-- Header -->
+                <header class="flex items-center justify-between mb-8 px-5 md:px-0">
+                    <div>
+                        <h1 id="hero-title" class="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-1">Encontrá tu<br>próxima propiedad</h1>
+                    </div>
+                    <div class="header-anim w-12 h-12 md:w-16 md:h-16 bg-black rounded-full flex items-center justify-center text-white shadow-lg">
+                        <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </header>
+
+                <!-- Search Bar -->
+                <div class="relative mb-8 header-anim max-w-2xl mx-auto md:mx-0 px-5 md:px-0">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" id="searchInput" class="w-full bg-gray-100/80 border-none rounded-full py-4 md:py-5 pl-12 pr-4 text-sm md:text-base font-medium focus:outline-none focus:ring-2 focus:ring-black placeholder-gray-500 transition-all" placeholder="Buscar zona, barrio o dirección...">
+                </div>
+
+                <!-- Operation Tabs -->
+                <div class="px-5 md:px-0 mb-10 header-anim max-w-2xl mx-auto md:mx-0">
+                    <div class="flex space-x-3 bg-gray-100/50 p-1.5 rounded-full relative">
+                        <div id="tab-bg" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-black rounded-full transition-transform duration-300 ease-out z-0"></div>
+                        
+                        <button onclick="setOperation('venta')" id="tab-venta" class="relative z-10 flex-1 flex items-center justify-center space-x-2 py-3 md:py-4 rounded-full text-white font-semibold transition-colors duration-300">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path></svg>
+                            <span class="md:text-lg">Venta</span>
+                        </button>
+                        <button onclick="setOperation('alquiler')" id="tab-alquiler" class="relative z-10 flex-1 flex items-center justify-center space-x-2 py-3 md:py-4 rounded-full text-gray-500 font-semibold transition-colors duration-300">
+                            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"></path></svg>
+                            <span class="md:text-lg">Alquiler</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Categories List -->
+                <div id="categories-container" class="w-full relative pb-0 mb-0">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: CATEGORY DETAILS (List of properties) -->
+        <section id="view-category" class="view-section relative bg-gray-50">
+            <!-- Header Image -->
+            <div id="cat-header-container" class="relative w-full h-[40vh] md:h-[50vh] rounded-b-[40px] md:rounded-b-[60px] overflow-hidden shadow-sm">
+                <img id="cat-header-img" src="" class="absolute inset-0 w-full h-full object-cover parallax-header" alt="Category">
+                <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60 md:bg-gradient-to-t md:from-black/70 md:via-black/20 md:to-transparent cat-header-content-anim"></div>
+                
+                <!-- Back Button -->
+                <button onclick="goBackToHome()" class="absolute top-12 left-5 md:top-8 md:left-8 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 hover:bg-white/40 transition cat-header-content-anim">
+                    <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+
+                <!-- Title -->
+                <div class="absolute bottom-8 left-6 md:bottom-12 md:left-12 z-20 cat-header-content-anim">
+                    <p id="cat-header-op" class="text-white/80 text-sm md:text-base font-medium uppercase tracking-wider mb-1">Venta</p>
+                    <h2 id="cat-header-title" class="text-4xl md:text-6xl font-bold text-white tracking-tight">Casas</h2>
+                </div>
+            </div>
+
+            <!-- Properties List -->
+            <div class="max-w-7xl mx-auto w-full">
+                <div id="properties-container" class="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 px-3 sm:px-6 pt-6 md:pt-10 pb-28">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: PROPERTY DETAILS -->
+        <section id="view-property" class="view-section relative bg-white md:bg-gray-50 md:py-10">
+             <!-- Desktop Split Layout Wrapper -->
+             <div class="md:max-w-6xl md:mx-auto md:bg-white md:rounded-[40px] md:shadow-2xl md:overflow-hidden md:flex md:flex-row md:min-h-[80vh]">
+                 
+                 <!-- Gallery Slider (Simplified to main image for mobile elegance) -->
+                 <div class="relative w-full h-[50vh] md:h-auto md:w-1/2">
+                    <img id="prop-img" src="" class="absolute inset-0 w-full h-full object-cover" alt="Property">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent md:bg-none md:bg-gradient-to-t md:from-black/60 md:to-transparent"></div>
+                    
+                    <!-- Back Button -->
+                    <button onclick="goBackToCategory()" class="absolute top-12 left-5 md:top-8 md:left-8 w-10 h-10 md:w-12 md:h-12 bg-black/30 backdrop-blur-md rounded-full flex items-center justify-center text-white z-20 transition hover:bg-black/50">
+                        <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+
+                    <!-- Status Badge -->
+                    <div class="absolute top-12 right-5 md:top-8 md:right-8 px-4 md:px-5 py-1.5 md:py-2 bg-black/40 backdrop-blur-md text-white text-xs md:text-sm font-bold uppercase tracking-wider rounded-full z-20">
+                        <span id="prop-op-badge">Venta</span>
+                    </div>
+                </div>
+
+                <!-- Content Panel -->
+                <div class="relative -mt-10 md:mt-0 bg-white rounded-t-[40px] md:rounded-none px-6 pt-10 pb-32 md:pb-10 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] md:shadow-none min-h-[60vh] md:min-h-0 md:w-1/2 md:flex md:flex-col md:justify-center md:px-12">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 id="prop-title" class="text-2xl md:text-4xl font-bold leading-tight mb-2 text-black">Título de propiedad</h2>
+                            <p id="prop-location" class="text-gray-500 text-sm md:text-base flex items-center">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                Ubicación
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 id="prop-price" class="text-3xl md:text-4xl font-bold text-black tracking-tight">USD 0</h3>
+                    </div>
+
+                    <!-- Features Grid -->
+                    <div class="grid grid-cols-3 gap-4 md:gap-6 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
+                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                            <span id="prop-beds" class="text-sm md:text-base font-semibold">0</span>
+                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Dorms</span>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
+                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span id="prop-baths" class="text-sm md:text-base font-semibold">0</span>
+                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Baños</span>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-2xl flex flex-col items-center justify-center transition hover:bg-gray-100">
+                            <svg class="w-6 h-6 md:w-7 md:h-7 text-gray-800 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                            <span id="prop-area" class="text-sm md:text-base font-semibold">0m2</span>
+                            <span class="text-[10px] md:text-xs text-gray-500 uppercase font-medium">Superficie</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <h4 class="text-lg md:text-xl font-bold mb-3">Descripción</h4>
+                        <p id="prop-desc" class="text-gray-500 text-sm md:text-base leading-relaxed"></p>
+                    </div>
+
+                    <div class="mb-8">
+                        <h4 class="text-lg md:text-xl font-bold mb-3">Características</h4>
+                        <ul id="prop-features" class="space-y-2 text-sm md:text-base text-gray-600 list-disc pl-4">
+                            <!-- Injected -->
+                        </ul>
+                    </div>
+
+                    <!-- Desktop Action Buttons (Hidden on Mobile) -->
+                    <div class="hidden md:flex space-x-4 mt-auto pt-8 border-t border-gray-100">
+                        <button class="flex-1 bg-black text-white py-4 rounded-full font-semibold text-base flex items-center justify-center space-x-2 transition hover:bg-gray-800 hover:shadow-lg active:scale-95">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                            <span>Consultar WhatsApp</span>
+                        </button>
+                        <button class="w-14 bg-gray-100 text-black py-4 rounded-full flex items-center justify-center transition hover:bg-gray-200 hover:shadow-md active:scale-95">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Bottom Action Bar (Mobile Only) -->
+            <div class="fixed bottom-0 left-0 w-full glass-panel px-5 py-4 z-50 flex space-x-3 transform translate-y-full md:hidden" id="action-bar" style="max-width: 100%; left: 0; transform: translateY(100%);">
+                <button class="flex-1 bg-black text-white py-4 rounded-full font-semibold text-sm flex items-center justify-center space-x-2 transition hover:bg-gray-900 active:scale-95">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    <span>Consultar WhatsApp</span>
+                </button>
+                <button class="w-14 bg-gray-100 text-black py-4 rounded-full flex items-center justify-center transition hover:bg-gray-200 active:scale-95">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Dummy element for transition effects -->
+        <div id="transition-layer" class="fixed inset-0 pointer-events-none z-50 hidden"></div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const DB = {
+            categories: [
+                { id: "casas", name: "Casas", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800" },
+                { id: "departamentos", name: "Departamentos", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800" },
+                { id: "quintas", name: "Quintas", image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800" },
+                { id: "locales", name: "Locales", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800" },
+                { id: "terrenos", name: "Terrenos", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800" }
+            ],
+            properties: [
+                { id: 1, categoryId: "casas", type: "venta", name: "Casa Minimalista en San Isidro", location: "San Isidro, GBA Norte", price: "USD 350.000", beds: 4, baths: 3, area: "250", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=800", description: "Espectacular casa de diseño minimalista con detalles de categoría. Amplio living comedor, cocina integrada con isla, galería con parrilla y piscina. Dormitorio principal en suite con vestidor.", features: ["Piscina climatizada", "Losa radiante", "Seguridad 24hs", "Riego automático"] },
+                { id: 2, categoryId: "casas", type: "alquiler", name: "Chalet Clásico c/ Parque", location: "Martinez, GBA Norte", price: "USD 1.200 / mes", beds: 3, baths: 2, area: "180", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800", description: "Hermoso chalet clásico rodeado de naturaleza. Ideal para familias. Cuenta con hogar a leña, amplio jardín y garage para 2 autos.", features: ["Jardín parquizado", "Hogar a leña", "Garage doble"] },
+                { id: 3, categoryId: "departamentos", type: "venta", name: "Piso Exclusivo Vista Río", location: "Puerto Madero, CABA", price: "USD 580.000", beds: 2, baths: 2, area: "120", image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800", description: "Piso alto con vistas panorámicas al río y la ciudad. Amenities premium. Terminaciones de primer nivel.", features: ["Gimnasio", "SUM", "Piscina en terraza", "Cochera cubierta"] },
+                { id: 4, categoryId: "departamentos", type: "alquiler", name: "Depto 2 Ambientes Moderno", location: "Palermo, CABA", price: "ARS 350.000 / mes", beds: 1, baths: 1, area: "45", image: "https://images.unsplash.com/photo-1502672260266-1c1c24240f38?auto=format&fit=crop&q=80&w=800", description: "Ideal para jóvenes profesionales. Cerca de polo gastronómico y transporte público. Balcón al frente.", features: ["Balcón", "Aire Acondicionado", "Cocina equipada"] },
+                { id: 5, categoryId: "quintas", type: "venta", name: "Quinta El Ensueño", location: "Pilar, GBA Norte", price: "USD 220.000", beds: 4, baths: 3, area: "1500", image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800", description: "Increíble lote arbolado con casa principal y casa de huéspedes. Gran piscina y quincho cerrado.", features: ["Quincho cerrado", "Casa de huéspedes", "Gran parque arbolado"] },
+                { id: 6, categoryId: "locales", type: "venta", name: "Local Comercial Esquina", location: "Belgrano, CABA", price: "USD 450.000", beds: 0, baths: 2, area: "100", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800", description: "Excelente local en esquina sobre avenida principal. Vidriera blindex, persiana metálica automática y entrepiso.", features: ["Vidriera doble altura", "Persiana automática", "Alto tránsito peatonal"] },
+                { id: 7, categoryId: "terrenos", type: "venta", name: "Lote al Agua en Barrio Cerrado", location: "Nordelta, Tigre", price: "USD 180.000", beds: 0, baths: 0, area: "800", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800", description: "Último lote disponible al agua en barrio consolidado. Orientación Norte.", features: ["Costa de lago", "Seguridad 24hs", "Club House"] }
+            ]
+        };
+
+        // --- STATE ---
+        let state = {
+            operation: 'venta',
+            currentCategoryId: null,
+            searchQuery: ''
+        };
+
+        // --- GSAP Setup ---
+        gsap.registerPlugin(ScrollTrigger);
+        
+        function initApp() {
+            // Initial render
+            renderCategories();
+            
+            // Custom Split Text para animar por caracteres sin dependencias premium
+            const heroTitle = document.querySelector('#hero-title');
+            if (heroTitle) {
+                const lines = heroTitle.innerHTML.split(/<br\s*\/?>/i);
+                heroTitle.innerHTML = '';
+                lines.forEach((line, lineIndex) => {
+                    const words = line.split(' ');
+                    words.forEach((word, wordIndex) => {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.style.display = 'inline-block';
+                        wordSpan.style.overflow = 'hidden'; // Máscara para cada palabra
+                        wordSpan.style.paddingBottom = '0.1em'; // Evitar cortar descensos de letras como la 'p'
+                        wordSpan.style.marginBottom = '-0.1em';
+                        
+                        [...word].forEach(char => {
+                            const charSpan = document.createElement('span');
+                            charSpan.className = 'char inline-block';
+                            charSpan.textContent = char;
+                            wordSpan.appendChild(charSpan);
+                        });
+                        
+                        heroTitle.appendChild(wordSpan);
+                        if (wordIndex < words.length - 1) heroTitle.appendChild(document.createTextNode(' '));
+                    });
+                    if (lineIndex < lines.length - 1) heroTitle.appendChild(document.createElement('br'));
+                });
+            }
+
+            // Animación de caracteres estilo SplitText
+            gsap.fromTo('.char', 
+                { y: '100%', opacity: 0, rotateZ: 5 }, 
+                { y: '0%', opacity: 1, rotateZ: 0, duration: 0.8, stagger: 0.015, ease: "power4.out", delay: 0.1 }
+            );
+
+            // Header animation entrance (Icono, Búsqueda, Tabs)
+            gsap.fromTo('.header-anim', 
+                { y: 30, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power3.out", delay: 0.5 }
+            );
+
+            // Setup Search
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                state.searchQuery = e.target.value.toLowerCase();
+                renderCategories();
+            });
+        }
+
+        function setOperation(op) {
+            if (state.operation === op) return;
+            state.operation = op;
+
+            // Animate Tabs UI
+            const tabVenta = document.getElementById('tab-venta');
+            const tabAlquiler = document.getElementById('tab-alquiler');
+            const tabBg = document.getElementById('tab-bg');
+
+            if (op === 'venta') {
+                tabBg.style.transform = 'translateX(0)';
+                tabVenta.classList.replace('text-gray-500', 'text-white');
+                tabAlquiler.classList.replace('text-white', 'text-gray-500');
+            } else {
+                tabBg.style.transform = 'translateX(100%)';
+                tabAlquiler.classList.replace('text-gray-500', 'text-white');
+                tabVenta.classList.replace('text-white', 'text-gray-500');
+            }
+
+            // Re-render
+            renderCategories();
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            
+            // Filter categories based on available properties for selected operation & search
+            const filteredCategories = DB.categories.filter(cat => {
+                return DB.properties.some(prop => 
+                    prop.categoryId === cat.id && 
+                    prop.type === state.operation &&
+                    (prop.name.toLowerCase().includes(state.searchQuery) || prop.location.toLowerCase().includes(state.searchQuery))
+                );
+            });
+
+            if (filteredCategories.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-500">No hay propiedades disponibles.</div>`;
+                return;
+            }
+
+            container.innerHTML = filteredCategories.map((cat, index) => `
+                <div class="category-card sticky top-12 md:top-16 relative w-full h-[380px] md:h-[500px] min-h-[380px] md:min-h-[500px] bg-gray-200 rounded-t-[36px] md:rounded-t-[48px] rounded-b-none overflow-hidden cursor-pointer will-change-transform shadow-[0_-16px_36px_rgba(0,0,0,0.22)] ${index > 0 ? '-mt-16 md:-mt-24' : 'mt-0'} mb-0" style="z-index: ${(index + 1) * 10};" onclick="openCategory('${cat.id}', this)">
+                    <img src="${cat.image}" class="absolute -top-[20%] left-0 w-full h-[140%] object-cover parallax-img pointer-events-none" alt="${cat.name}" loading="lazy" onload="this.classList.add('loaded')">
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/25 pointer-events-none"></div>
+                    
+                    <div class="absolute inset-0 p-6 md:p-10 pt-8 md:pt-12 flex flex-col justify-start card-content pointer-events-none">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-3xl md:text-5xl font-bold text-white tracking-tight drop-shadow-md">${cat.name}</h3>
+                            <div class="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 transform transition-transform group-hover:scale-110 shadow-lg">
+                                <svg class="w-5 h-5 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Kill old scroll triggers before applying new ones
+            ScrollTrigger.getAll().forEach(t => t.kill());
+
+            // Apply Progressive Scroll-Tied Unfold & Parallax Animations
+            setTimeout(() => {
+                const cards = gsap.utils.toArray('.category-card');
+
+                cards.forEach((card, i) => {
+                    const img = card.querySelector('.parallax-img');
+                    const content = card.querySelector('.card-content');
+                    
+                    // Reset animation props preserving z-index
+                    gsap.set(card, { clearProps: "transform,opacity,clipPath,filter" });
+                    gsap.set(card, { 
+                        zIndex: (i + 1) * 10,
+                        transformPerspective: 950,
+                        transformOrigin: "50% 0%"
+                    });
+
+                    if (i === 0) {
+                        // First card is fully revealed from the beginning
+                        gsap.set(card, { rotateX: 0, scale: 1, opacity: 1, y: 0 });
+                        gsap.set(img, { scale: 1.05 });
+                        gsap.set(content, { opacity: 1, y: 0, scale: 1 });
+
+                        // Centered parallax for the first card
+                        gsap.fromTo(img, 
+                            { yPercent: -10 },
+                            {
+                                yPercent: 10,
+                                ease: "none",
+                                scrollTrigger: {
+                                    trigger: card,
+                                    start: "top bottom",
+                                    end: "bottom top",
+                                    scrub: true
+                                }
+                            }
+                        );
+                    } else {
+                        // Subsequent cards: Stacked Unfold Cards (Expressive 3D unfold overlapping previous card)
+                        gsap.set(card, { 
+                            rotateX: 28, 
+                            scale: 0.91,
+                            y: 0,
+                            opacity: 1
+                        });
+                        gsap.set(img, { scale: 1.3, yPercent: -14 });
+                        gsap.set(content, { opacity: 0.35, y: 40, scale: 0.92 });
+
+                        // ScrollTrigger with scrub: 0.8 for a tactile, progressive unfolding with scroll
+                        const tl = gsap.timeline({
+                            scrollTrigger: {
+                                trigger: card,
+                                start: "top 92%",    // Starts unfolding while deeply overlapping the previous card
+                                end: "top 64px",     // Reaches fully open sticky resting position
+                                scrub: 0.8           // Continuous progressive unrolling
+                            }
+                        });
+
+                        // 1. Card visibly unfolds forward in 3D (Unfold) from the card stack
+                        tl.to(card, {
+                            rotateX: 0,
+                            scale: 1,
+                            y: 0,
+                            ease: "none"
+                        }, 0)
+                        // 2. Parallax and image framing inside the unfolding card
+                        .to(img, {
+                            scale: 1.05,
+                            yPercent: 8,
+                            ease: "none"
+                        }, 0)
+                        // 3. Card titles and arrow reveal and rise fluidly into place
+                        .to(content, {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                            ease: "none"
+                        }, 0);
+
+                        // 4. Subtle stack compression for previous card: recedes slightly into the deck
+                        if (cards[i - 1]) {
+                            tl.to(cards[i - 1], {
+                                scale: 0.96,
+                                yPercent: -2,
+                                ease: "none"
+                            }, 0);
+                        }
+                    }
+                });
+
+                ScrollTrigger.refresh();
+            }, 60);
+        }
+
+        function openCategory(categoryId, cardElement) {
+            state.currentCategoryId = categoryId;
+            const catData = DB.categories.find(c => c.id === categoryId);
+
+            // 1. Tap Interaction (Feedback visual táctil)
+            gsap.to(cardElement, { 
+                scale: 0.94, 
+                duration: 0.2, 
+                ease: "power2.in",
+                onComplete: () => {
+                    performCategoryTransition(catData, cardElement);
+                    // Restablecer la escala inmediatamente para que al volver esté 100% en su tamaño normal
+                    gsap.set(cardElement, { scale: 1 });
+                }
+            });
+        }
+
+        function performCategoryTransition(catData, cardElement) {
+            const homeView = document.getElementById('view-home');
+            const catView = document.getElementById('view-category');
+            
+            // Elementos del nuevo header a animar
+            const headerContainer = document.getElementById('cat-header-container');
+            const headerImg = document.getElementById('cat-header-img');
+            const headerContent = document.querySelectorAll('.cat-header-content-anim');
+            
+            // Set data for category view
+            headerImg.src = catData.image;
+            document.getElementById('cat-header-title').innerText = catData.name;
+            document.getElementById('cat-header-op').innerText = state.operation;
+            
+            renderProperties(catData.id);
+
+            // Preparamos la nueva vista simulando que es la card comprimida
+            gsap.set(catView, { display: 'block', opacity: 1 });
+            gsap.set(headerContainer, {
+                clipPath: "inset(35% 0% 35% 0% round 36px 36px 0px 0px)",
+                y: 60,
+                scale: 0.98
+            });
+            gsap.set(headerImg, { scale: 1.5 }); // Arranca muy zoomeada
+            gsap.set(headerContent, { opacity: 0, y: 30 }); // Escondemos textos y botones
+            gsap.set('#properties-container', { opacity: 0 }); // Escondemos lista de propiedades
+            
+            const tl = gsap.timeline();
+            
+            // 1. Desaparece el Home
+            tl.to(homeView, {
+                opacity: 0,
+                scale: 0.95,
+                duration: 0.5,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    homeView.classList.remove('active');
+                    homeView.style.display = 'none';
+                    gsap.set(homeView, { clearProps: "all" });
+                }
+            }, 0)
+            
+            // 2. MAGIA: El header se expande (Hero Transition)
+            .to(headerContainer, {
+                clipPath: "inset(0% 0% 0% 0% round 0px)", // Se abre completamente
+                y: 0,
+                scale: 1,
+                duration: 1.2,
+                ease: "power4.inOut",
+                onStart: () => {
+                    catView.classList.add('active');
+                    window.scrollTo(0, 0); // scroll to top
+                }
+            }, 0.1)
+            .to(headerImg, {
+                scale: 1, // El zoom se acomoda
+                duration: 1.2,
+                ease: "power4.inOut"
+            }, 0.1)
+            
+            // 3. Aparecen textos del header con delay
+            .to(headerContent, {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "back.out(1.5)"
+            }, "-=0.6")
+            
+            // 4. Capsule Reveal Mask Animation de las propiedades en grilla de 2 columnas
+            .to('#properties-container', { opacity: 1, duration: 0.1 }, "-=0.6")
+            .fromTo('.prop-card', 
+                { 
+                    clipPath: "inset(28% 18% 28% 18% round 9999px)",
+                    scale: 0.82,
+                    y: 35,
+                    opacity: 0,
+                    filter: "blur(5px)"
+                },
+                { 
+                    clipPath: "inset(0% 0% 0% 0% round 24px)",
+                    scale: 1,
+                    y: 0,
+                    opacity: 1,
+                    filter: "blur(0px)",
+                    duration: 0.95,
+                    stagger: {
+                        each: 0.08,
+                        from: "start"
+                    },
+                    ease: "power4.out"
+                },
+                "-=0.6"
+            )
+            .fromTo('.prop-card img',
+                { scale: 1.35 },
+                { scale: 1, duration: 1.05, stagger: 0.08, ease: "power3.out" },
+                "<"
+            );
+        }
+
+        function renderProperties(categoryId) {
+            const container = document.getElementById('properties-container');
+            
+            const props = DB.properties.filter(p => 
+                p.categoryId === categoryId && 
+                p.type === state.operation &&
+                (p.name.toLowerCase().includes(state.searchQuery) || p.location.toLowerCase().includes(state.searchQuery))
+            );
+
+            container.innerHTML = props.map(prop => `
+                <div class="prop-card bg-white rounded-[20px] sm:rounded-[30px] overflow-hidden shadow-[0_4px_22px_rgba(0,0,0,0.06)] border border-gray-100 cursor-pointer group flex flex-col h-full w-full will-change-transform transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]" onclick="openProperty(${prop.id}, this)">
+                    <div class="relative w-full h-36 sm:h-48 md:h-56 overflow-hidden shrink-0 bg-gray-100">
+                        <img src="${prop.image}" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" alt="${prop.name}">
+                        <div class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-white/90 backdrop-blur-md px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-black">
+                            ${prop.type}
+                        </div>
+                    </div>
+                    <div class="p-3.5 sm:p-5 md:p-6 flex flex-col flex-grow justify-between">
+                        <div>
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-1">
+                                <h3 class="text-sm sm:text-base md:text-xl font-bold leading-snug text-gray-900 line-clamp-2">${prop.name}</h3>
+                                <span class="text-xs sm:text-sm md:text-base font-bold whitespace-nowrap bg-gray-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg self-start shrink-0">${prop.price.split(' ')[0]} ${prop.price.split(' ')[1]}</span>
+                            </div>
+                            <p class="text-gray-500 text-[11px] sm:text-xs md:text-sm mb-2.5 sm:mb-3 flex items-center truncate">
+                                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                ${prop.location}
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 sm:space-x-4 text-[10px] sm:text-xs md:text-sm font-medium text-gray-600 my-1 sm:my-2 border-t border-gray-100 pt-2 sm:pt-3">
+                            ${prop.beds > 0 ? `<div class="flex items-center"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> ${prop.beds}<span class="hidden sm:inline ml-0.5">d</span></div>` : ''}
+                            ${prop.baths > 0 ? `<div class="flex items-center"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${prop.baths}</div>` : ''}
+                            <div class="flex items-center"><svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg> ${prop.area}m²</div>
+                        </div>
+                        
+                        <button class="w-full bg-black text-white text-xs sm:text-sm md:text-base font-semibold py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl transition group-hover:bg-gray-800 active:scale-[0.98] mt-2 shrink-0">Ver propiedad</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProperty(propId, cardElement) {
+            const prop = DB.properties.find(p => p.id === propId);
+            const catView = document.getElementById('view-category');
+            const propView = document.getElementById('view-property');
+            
+            // Populate Detail View
+            document.getElementById('prop-img').src = prop.image;
+            document.getElementById('prop-op-badge').innerText = prop.type;
+            document.getElementById('prop-title').innerText = prop.name;
+            document.getElementById('prop-location').innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>${prop.location}`;
+            document.getElementById('prop-price').innerText = prop.price;
+            document.getElementById('prop-beds').innerText = prop.beds;
+            document.getElementById('prop-baths').innerText = prop.baths;
+            document.getElementById('prop-area').innerText = prop.area + 'm2';
+            document.getElementById('prop-desc').innerText = prop.description;
+            
+            document.getElementById('prop-features').innerHTML = prop.features.map(f => `<li>${f}</li>`).join('');
+
+            // Transition
+            gsap.set(propView, { display: 'block', opacity: 0, x: 100 });
+            
+            gsap.to(catView, { opacity: 0, x: -50, duration: 0.4, ease: "power2.inOut", onComplete: () => {
+                catView.classList.remove('active');
+                catView.style.display = 'none';
+            }});
+            
+            gsap.to(propView, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out", onStart: () => {
+                propView.classList.add('active');
+                window.scrollTo(0, 0);
+                
+                // Animate bottom bar up
+                gsap.to('#action-bar', { y: 0, duration: 0.6, ease: "back.out(1)", delay: 0.3 });
+            }});
+        }
+
+        function goBackToHome() {
+            const homeView = document.getElementById('view-home');
+            const catView = document.getElementById('view-category');
+            const headerContainer = document.getElementById('cat-header-container');
+            const headerContent = document.querySelectorAll('.cat-header-content-anim');
+
+            // Asegurar que todas las tarjetas de categorías estén al 100% de su tamaño
+            gsap.set('.category-card', { scale: 1 });
+
+            gsap.set(homeView, { display: 'block', opacity: 0, scale: 0.98 });
+            
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    catView.classList.remove('active');
+                    catView.style.display = 'none';
+                    homeView.classList.add('active');
+                    // Reset properties to avoid issues on next entry
+                    gsap.set(headerContainer, { clearProps: "all" });
+                    ScrollTrigger.refresh();
+                }
+            });
+
+            // Simulamos que el header se vuelve a encoger a tamaño de tarjeta
+            tl.to(headerContent, { opacity: 0, y: -20, duration: 0.3 }, 0)
+            .to('.prop-card', { opacity: 0, y: 40, duration: 0.3, stagger: 0.05, ease: "power2.in" }, 0)
+            .to(headerContainer, {
+                clipPath: "inset(25% 0% 25% 0% round 36px 36px 0px 0px)",
+                opacity: 0,
+                y: 60,
+                scale: 0.98,
+                duration: 0.5,
+                ease: "power4.inOut"
+            }, 0.1)
+            .to(homeView, { 
+                opacity: 1, 
+                scale: 1, 
+                duration: 0.6, 
+                ease: "power3.out" 
+            }, 0.3);
+        }
+
+        function goBackToCategory() {
+            const catView = document.getElementById('view-category');
+            const propView = document.getElementById('view-property');
+            
+            // Hide bottom bar
+            gsap.to('#action-bar', { y: '100%', duration: 0.3, ease: "power2.in" });
+
+            gsap.set(catView, { display: 'block', opacity: 0, x: -50 });
+            
+            gsap.to(propView, { opacity: 0, x: 100, duration: 0.4, ease: "power2.inOut", onComplete: () => {
+                propView.classList.remove('active');
+                propView.style.display = 'none';
+            }});
+            
+            gsap.to(catView, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out", delay: 0.1, onStart: () => {
+                catView.classList.add('active');
+            }});
+        }
+
+        // Initialize App on load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
